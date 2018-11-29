@@ -12,11 +12,13 @@ import Dimensions from 'Dimensions';
 
 import FormScreen from './src/components/FormScreen'
 import HomeScreen from './src/components/HomeScreen'
+import ListScreen from './src/components/ListScreen'
 
 const AppNavigator = createStackNavigator(
   {
     Home: HomeScreen,
-    Registration: FormScreen
+    Registration: FormScreen,
+    List : ListScreen,
   },
   {
     initialRouteName: "Home",

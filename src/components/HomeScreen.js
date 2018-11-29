@@ -31,7 +31,7 @@ export default class FormScreen extends Component {
                 <Text style={styles.txtButton}>Registrar Empresa</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate('Registration')}>
+            <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate('List')}>
                 <Text style={styles.txtButton}>Listar Empresas</Text>
             </TouchableOpacity>
             
