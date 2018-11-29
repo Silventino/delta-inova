@@ -1,27 +1,33 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-import TextInput from './src/components/TextInput'
+import {
+  Platform, 
+  StyleSheet,
+  Text, 
+  View, 
+  Image
+} from 'react-native';
+import { createStackNavigator, createAppContainer } from "react-navigation";
+import Dimensions from 'Dimensions';
+
 import FormScreen from './src/components/FormScreen'
+import HomeScreen from './src/components/HomeScreen'
 
-
-
-export default class App extends Component<{}> {
-  render() {
-    return (
-      <View style={styles.container}>
-        <FormScreen/>
-      </View>
-    );
+const AppNavigator = createStackNavigator(
+  {
+    Home: HomeScreen,
+    Registration: FormScreen
+  },
+  {
+    initialRouteName: "Home",
+    headerMode: "screen"
   }
-}
+);
+
+export default createAppContainer(AppNavigator);
+
+const DEVICE_WIDTH = Dimensions.get('window').width;
+const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {
@@ -40,4 +46,7 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  logo:{
+
+  }
 });

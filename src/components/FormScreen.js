@@ -5,6 +5,11 @@ import TextInput from './TextInput'
 import {StyleSheet, View, Image, TouchableHighlight, KeyboardAvoidingView, Button, Text, TouchableOpacity} from 'react-native';
 
 export default class FormScreen extends Component {
+    static navigationOptions = {
+        header: null,
+        // title: 'Welcome',
+      };
+
     constructor(props){
         super(props);
 
@@ -20,6 +25,7 @@ export default class FormScreen extends Component {
     render() {
         return (
         <View style={styles.container}>
+            <View style={styles.card}>
                 <Image
                     source={require('../images/grupodelta-logo.png')}
                     style={styles.logo}
@@ -44,7 +50,7 @@ export default class FormScreen extends Component {
                 <TouchableOpacity style={styles.btnSubmit} onPress={() => this.registerInFirebase(this.state.cnpj, this.state.nome)}>
                     <Text style={styles.txtButton}>Enviar</Text>
                 </TouchableOpacity>
-
+            </View>
         </View>
         );
     }
@@ -85,6 +91,12 @@ const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#2da1d2',
+      },
+    card: {
         width: DEVICE_WIDTH -40,
         alignItems: 'center',
         backgroundColor: '#fff',
