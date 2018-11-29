@@ -2,7 +2,27 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Dimensions from 'Dimensions';
 import TextInput from './TextInput'
-import {StyleSheet, View, Image, TouchableHighlight, KeyboardAvoidingView, Button, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Image, TouchableHighlight, KeyboardAvoidingView, Button, Text, TouchableOpacity, CameraRoll, PermissionsAndroid} from 'react-native';
+
+async function requestCameraPermission() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          'title': 'Cool Photo App Camera Permission',
+          'message': 'Cool Photo App needs access to your camera ' +
+                     'so you can take awesome pictures.'
+        }
+      )
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("You can use the camera")
+      } else {
+        console.log("Camera permission denied")
+      }
+    } catch (err) {
+      console.warn(err)
+    }
+  }
 
 export default class ListScreen extends Component {
     static navigationOptions = {
@@ -20,7 +40,9 @@ export default class ListScreen extends Component {
     }
 
     componentDidMount(){
-        this.queryAPI()
+        this.queryAPI();
+        await requestCameraPermission();
+        this.getPhotos();
     }
 
     queryAPI(){
@@ -48,6 +70,14 @@ export default class ListScreen extends Component {
             }
         </View>
         );
+    }
+
+    getPhotos = () => {
+        CameraRoll.getPhotos({
+          first: 20,
+          assetType: 'All'
+        })
+        .then(r => this.setState({ photos: r.edges }))
     }
     
     generateList(){
