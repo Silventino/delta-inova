@@ -47,9 +47,9 @@ export default class FormScreen extends Component {
                     onChangeText = {this.updateCNPJ}
 
                 />
-                <TouchableOpacity style={styles.btnSubmit} onPress={() => this.registerInFirebase(this.state.cnpj, this.state.nome)}>
+                <TouchableHighlight style={styles.btnSubmit} onPress={() => this.registerInFirebase(this.state.cnpj, this.state.nome)}>
                     <Text style={styles.txtButton}>Enviar</Text>
-                </TouchableOpacity>
+                </TouchableHighlight>
             </View>
         </View>
         );
@@ -71,7 +71,7 @@ export default class FormScreen extends Component {
                   'Content-Type': 'application/json'
                 },
                 method: "PUT",
-                body: JSON.stringify({nome: this.state.nome})
+                body: JSON.stringify({nome: this.state.nome, image: ""})
             })
             .then(function(res){ console.log(res) })
             .catch(function(res){ console.log(res) })
