@@ -78,8 +78,10 @@ export default class ListScreen extends Component {
         fetch('https://delta-inova.firebaseio.com/empresas.json')
             .then(response => response.json())
             .then((json) => {
-                this.setState({empresas: json})
-                console.log(this.state.empresas["123456789"]["nome"])
+                console.log(json)
+                if(json != null){
+                    this.setState({empresas: json})
+                }
             });
     }
     
