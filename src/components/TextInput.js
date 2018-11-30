@@ -17,6 +17,7 @@ export default class UserInput extends Component {
           placeholderTextColor="white"
           underlineColorAndroid="transparent"
           onChangeText = {(txt) =>this.props.onChangeText(txt)}
+          keyboardType={this.props.type}
         />
       </View>
     );

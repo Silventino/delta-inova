@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Dimensions from 'Dimensions';
-import TextInput from './TextInput'
-import {StyleSheet, View, Image, TouchableHighlight, KeyboardAvoidingView, Button, Text, ScrollView} from 'react-native';
+import TextInput from './TextInput';
+import {StyleSheet, View, Image, TouchableOpacity, Alert, Modal, Text, ScrollView} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
+import Popup from './PopupInfo';
 
 export default class FormScreen extends Component {
     static navigationOptions = {
@@ -15,17 +16,108 @@ export default class FormScreen extends Component {
         super(props);
 
         this.state = {
-        cnpj: "",
-        nome: "",
-        img: require('../images/picture.png'),
-        imageWasUploaded: false,
+            cnpj: "",
+            nome: "",
+            img: require('../images/picture.png'),
+            imageWasUploaded: false,
+            modalVisibility: false,
+            confirm: true,
+            msg: "",
         };
         
         this.updateCNPJ = this.updateCNPJ.bind(this)
         this.updateNome = this.updateNome.bind(this)
     }
 
-    getUserImage(cnpj){             
+    render() {
+        return (
+        <View style={styles.container}>
+
+            <Popup
+                modalVisibility={this.state.modalVisibility}
+                confirm={this.state.confirm}
+                msg={this.state.msg}
+                onButtonPress={(close)=>{
+                    this.changeModalVisibility(false);
+                    console.log("apertou o botao")
+                    if(close){
+                        console.log("goBack!");
+                        this.props.navigation.goBack();
+                    }
+                }}
+            />
+
+            <ScrollView style={styles.card} contentContainerStyle={{alignItems: 'center'}} keyboardShouldPersistTaps="always">
+                <Image
+                    source={require('../images/grupodelta-logo-horizontal.png')}
+                    style={styles.logo}
+                />
+                <Text style={styles.txtCadastro}>
+                    Cadastro de Empresa:
+                </Text>
+                <TouchableOpacity onPress={() =>this.getUserImage()}>
+                    <Image
+                        source={this.state.img}
+                        style={styles.img}
+                    />
+                </TouchableOpacity>
+                <TextInput 
+                    placeholder="Nome da Empresa"
+                    secureTextEntry={false}
+                    autoCorrect={true}
+                    onChangeText = {this.updateNome}
+                    type={"default"}
+                />
+                <TextInput 
+                    placeholder="CNPJ"
+                    secureTextEntry={false}
+                    autoCorrect={true}
+                    onChangeText = {this.updateCNPJ}
+                    type={"numeric"}
+                />
+                <TouchableOpacity style={styles.btnSubmit} onPress={() => this.submit()}>
+                    <Text style={styles.txtButton}>Enviar</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </View>
+        );
+    }
+
+    submit(){
+        if(!this.checkIfFieldsAreComplete()){
+            return
+        }
+        if(!this.checkIfCNPJIsValid()){
+            return
+        }
+        // O upload para o BD foi feito dentro da funçao checkIfCNPJIsUnique por que ela é assincrona
+        if(!this.checkIfCNPJIsUnique()){
+            return
+        }
+    }
+
+    changeModalVisibility(visibility){
+        this.setState({modalVisibility: visibility});
+    }
+
+    checkIfCNPJIsValid(){
+        var isnum = /^\d+$/.test(this.state.cnpj);
+        if(isnum){
+            if(this.state.cnpj.length != 14){
+                this.showPopUp(false, "CNPJ deve ter 14 dígitos.");
+                return false;
+            }
+            return true;
+        }
+        else{
+            this.showPopUp(false, "CNPJ deve conter apenas números.");
+            return false;
+        }
+    }
+
+
+
+    getUserImage(){             
         ImagePicker.showImagePicker(null, (response) => {
             console.log('Response = ', response);
         
@@ -54,57 +146,54 @@ export default class FormScreen extends Component {
         });
     }
 
-    render() {
-        return (
-        <View style={styles.container}>
-            <ScrollView style={styles.card} contentContainerStyle={{alignItems: 'center'}}>
-                <Image
-                    source={require('../images/grupodelta-logo.png')}
-                    style={styles.logo}
-                />
-                <Text style={styles.txtCadastro}>
-                    Cadastro de Empresa:
-                </Text>
-                <TouchableHighlight onPress={() =>this.getUserImage()}>
-                    <Image
-                        source={this.state.img}
-                        style={styles.img}
-                    />
-                </TouchableHighlight>
-                <TextInput 
-                    placeholder="Nome da Empresa"
-                    secureTextEntry={false}
-                    autoCorrect={true}
-                    onChangeText = {this.updateNome}
+    showPopUp(confirm, msg){
+        this.setState({confirm: confirm, modalVisibility: true, msg: msg})
+    }
 
-                />
-                <TextInput 
-                    placeholder="CNPJ"
-                    secureTextEntry={false}
-                    autoCorrect={true}
-                    onChangeText = {this.updateCNPJ}
+    showPopupBasedOnResult(res){
+        if(res['status'] == 200){
+            this.showPopUp(true, "");
+        }
+        else{
+            this.showPopUp(false, "Erro ao gravar no banco de dados.");
+        }
+    }
 
-                />
-                <TouchableHighlight style={styles.btnSubmit} onPress={() => this.registerInFirebase(this.state.cnpj, this.state.nome)}>
-                    <Text style={styles.txtButton}>Enviar</Text>
-                </TouchableHighlight>
-            </ScrollView>
-        </View>
-        );
+    checkIfFieldsAreComplete(){
+        if(this.state.cnpj == "" || this.state.nome == ""){
+            // this.setState({confirm: false, modalVisibility: true});
+            this.showPopUp(false, "Preencha os campos CNPJ e nome da empresa.");
+            return false
+        }
+        return true
+    }
+
+
+    checkIfCNPJIsUnique(){
+        fetch('https://delta-inova.firebaseio.com/empresas/' + this.state.cnpj +'.json')
+            .then(response => response.json())
+            .then((json) => {
+                console.log(json)
+                if(json != null){   
+                    this.showPopUp(false, "CNPJ já cadastrado.");
+                    return false;
+                }
+                else{
+                    this.registerInFirebase();
+                    return true;
+                }
+        });
     }
 
     registerInFirebase(){
-        if(this.state.cnpj == "" || this.state.nome == ""){
-            return
-        }
-        console.log(this.state.nome);
-
         var image;
         if(this.state.imageWasUploaded){
+            console.log("Noss");
             image = this.state.img;
         }
         else{
-            image = ""
+            console.log("Foiii");
+            image = {uri: ""}
         }
         fetch("https://delta-inova.firebaseio.com/empresas/" + this.state.cnpj + ".json",
             {
@@ -115,8 +204,9 @@ export default class FormScreen extends Component {
                 method: "PUT",
                 body: JSON.stringify({nome: this.state.nome, image: image['uri']})
             })
-            .then(function(res){ console.log(res) })
-            .catch(function(res){ console.log(res) })
+            .then((res) => this.showPopupBasedOnResult(res))
+            .catch(function(res){ })
+ 
     }
 
     updateCNPJ(cnpjTxt){
@@ -143,11 +233,12 @@ const styles = StyleSheet.create({
         width: DEVICE_WIDTH -40,
         backgroundColor: '#fff',
         borderRadius:10,
-        padding: 10
+        padding: 10,
     },
     logo: {
-        height: 100,
-        resizeMode: 'contain',
+        width: DEVICE_WIDTH - 80,
+        height: ((DEVICE_WIDTH - 80)/4),
+        resizeMode: 'center',
         margin: 20,
         marginBottom: 10,
     },
@@ -165,8 +256,8 @@ const styles = StyleSheet.create({
         color: '#fff'
     },
     txtCadastro:{
-        fontSize: 18,
-        marginBottom: 10,
+        fontSize: 20,
+        marginBottom: 15,
 
     },
     img:{

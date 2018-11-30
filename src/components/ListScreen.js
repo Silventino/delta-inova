@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Dimensions from 'Dimensions';
 import TextInput from './TextInput'
-import {StyleSheet, View, Image, TouchableHighlight, ScrollView, Text} from 'react-native';
+import {StyleSheet, View, Image, TouchableOpacity, ScrollView, Text} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 
 
@@ -18,7 +18,7 @@ export default class ListScreen extends Component {
         
         this.state = {
             empresas: {},
-            img: require('../images/grupodelta-logo.png'),
+            img: require('../images/grupodelta-logo-horizontal.png'),
         };
         
     }
@@ -68,7 +68,7 @@ export default class ListScreen extends Component {
             method: "PUT",
             body: JSON.stringify(imagem)
         })
-        .then(function(res){ this.queryAPI() })
+        .then(this.queryAPI())
         .catch(function(res){ console.log(res) })
 
     }
@@ -90,14 +90,19 @@ export default class ListScreen extends Component {
             <ScrollView style={styles.container} contentContainerStyle={{alignItems:'center'}}>
             {
                 Object.keys(this.state.empresas).map((key, index)=>{
+                    console.log(this.state.empresas[key]['image']);
+                    imagem = {uri: this.state.empresas[key]['image']};
+                    if(this.state.empresas[key]['image'] == "" || this.state.empresas[key]['image'] == undefined){
+                        imagem = require('../images/picture.png');
+                    }
                     return (
-                        <TouchableHighlight key={key+"view"} style={styles.card} onPress={()=>{ this.getUserImage(key) }}>
+                        <TouchableOpacity key={key+"view"} style={styles.card} onPress={()=>{ this.getUserImage(key) }}>
                             <View style={styles.center}>
-                                <Image key={key+"img"} style={styles.imgCard} source={{uri: this.state.empresas[key]['image']}}/>
+                                <Image key={key+"img"} style={styles.imgCard} source={imagem}/>
                                 <Text key={key+"nome"} style={{fontSize:18}}>{this.state.empresas[key]['nome']}</Text>
                                 <Text key={key+"cnpj"}>CNPJ: {key}</Text>
                             </View>
-                        </TouchableHighlight>
+                        </TouchableOpacity>
 
                     )
                 })
